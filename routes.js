@@ -60,13 +60,23 @@ router.delete("/:qid/answers/:aid", (req, res) => {
 // POST /questions/:qid/answers/:aid/voteUp
 // POST /questions/:qid/answers/:aid/voteDown
 // Route for voting up/down answers
-router.post("/:qid/answers/:aid/vote-:direction", (req, res) => {
-    res.json({ 
-        response: `You sent me a POST request to /answers/${req.params.aid}/vote/${req.params.direction}`,
-        questionId: req.params.qid,
-        answerId: req.params.aid,
-        vote: req.params.direction
-    })
-})
+router.post("/:qid/answers/:aid/vote-:direction", 
+    (req, res, next) => {
+        if(req.params.direction.search(/^(up|down)$/) == -1) {
+            var err = new Error('Not Found. Invalid syntax.')
+            err.status = 404
+            next(err)
+        } else {next()}
+    },
+    (req, res) => {
+        res.json({ 
+            response: `You sent me a POST request to /answers/${req.params.aid}/vote/${req.params.direction}`,
+            questionId: req.params.qid,
+            answerId: req.params.aid,
+            vote: req.params.direction
+         })
+    }
+
+)
 
 module.exports = router
