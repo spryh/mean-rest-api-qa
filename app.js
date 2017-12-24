@@ -10,6 +10,20 @@ var jsonParser = require('body-parser').json
 
 app.use(logger('dev'))
 app.use(jsonParser())
+
+var mongoose = require('mongoose')
+mongoose.Promise = global.Promise;
+var port = 27017
+
+mongoose.connect(`mongodb://localhost:${port}/qa`, {useMongoClient: true})
+var db = mongoose.connection
+db.on('error', (err)=>{
+    console.error(`MongoDB connection error: ${err}`)
+})
+db.once('open', ()=>{
+    console.log(`MongoDB connection successful on port ${port}`)
+})
+
 app.use('/questions', routes)
 
 // Catch 404 forward to error handler
