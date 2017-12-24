@@ -47,11 +47,13 @@ db.once('open', ()=>{
         next()
     })
 
+    // Static methods are called on model objects
     AnimalSchema.statics.findSize = function(size,callback){
         // this == Animal
         return this.find({size:size}, callback)
     }
 
+    // Instance methods are called on document objects
     AnimalSchema.methods.findSameColor = function(callback){
         // this == document
         return this.model('Animal').find({color:this.color}, callback)
