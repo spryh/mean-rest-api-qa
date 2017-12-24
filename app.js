@@ -24,6 +24,22 @@ db.once('open', ()=>{
     console.log(`MongoDB connection successful on port ${port}`)
 })
 
+// CORS
+app.use((req,res,next)=>{
+    // Permits any domain access
+    res.header('Access-Control-Allow-Origin', '*')
+    // Permits requests with standard headers
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    //Pre-flight requests
+    if(req.method == 'OPTIONS') {
+        res.header('Access-Control-Allow-Headers', 'PUT,POST,DELETE')
+        return res.status(200).json({})
+    }
+    next()
+})
+
+
+// ROUTING 
 app.use('/questions', routes)
 
 // Catch 404 forward to error handler
