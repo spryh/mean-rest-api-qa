@@ -39,13 +39,17 @@ db.once('open', ()=>{
     */
 
     AnimalSchema.pre('save', function(next){
-        console.log(`\n${this}`);
+        // console.log(`\n${this}`);
         if(this.mass >= 100){ this.size= "big"}
         else if(this.mass >= 5 && this.mass < 100){ this.size= 'medium'}
         else { this.size= 'small'} 
-        console.log(this);
+        // console.log(this);
         next()
     })
+
+    AnimalSchema.statics.findSize = function(size,callback){
+        return this.find({size:size}, callback)
+    }
 
     // Model will create and save object
     var Animal = mongoose.model('Animal', AnimalSchema)
@@ -94,7 +98,7 @@ db.once('open', ()=>{
         if(err){console.error('Animal Remove Error', err)}
         Animal.create(animalData, (err, animals)=>{
             if(err){console.error('Whale save failed.', err)}
-            Animal.find({}, (err, animals) =>{
+            Animal.findSize("medium", (err, animals) =>{
                 animals.forEach((animal)=>{
                     console.log(`${animal.name} is a ${animal.size} ${animal.color} ${animal.type}`)
                 })
