@@ -27,16 +27,31 @@ db.once('open', ()=>{
     var AnimalSchema = new Schema({
         type: {type: String, default: 'goldfish'},
         color:{type: String, default: 'orange'},
-        size: {type: String, default: 'small'},
         mass: {type: Number, default: '.007'},
-        name: {type: String, default: 'Angela'}
+        name: {type: String, default: 'Angela'},
+        size: {type: String, default: 'Undetermined'}
     })
+
+    /* 
+    Mongoose pre hooks explicitly rely on passing the document through this rather than as a parameter. 
+    Fat arrows won't work with this paradigm. You should use an anonymous function instead 
+    (i.e., function() {} instead of (next)>{}) TRY IT OUT and it will break!
+    */
+
+    AnimalSchema.pre('save', function(next){
+        console.log(`\n${this}`);
+        if(this.mass >= 100){ this.size= "big"}
+        else if(this.mass >= 5 && this.mass < 100){ this.size= 'medium'}
+        else { this.size= 'small'} 
+        console.log(this);
+        next()
+    })
+
     // Model will create and save object
     var Animal = mongoose.model('Animal', AnimalSchema)
 
     var elephant = new Animal({
         type: 'elephant',
-        size: 'big',
         color: 'grey',
         mass: 6000,
         name: 'Lawrence'
@@ -46,29 +61,45 @@ db.once('open', ()=>{
 
     var whale = new Animal({
         type: 'whale',
-        size: 'big',
         mass: 190500,
         name: 'Big Blue'
     })
     
+    var animalData = [
+        {
+            type: 'mouse',
+            color: 'grey',
+            mass: 0.035,
+            name: 'Marvin'
+        },
+        {
+            type: 'nutria',
+            color: 'brown',
+            mass: 6.035,
+            name: 'Gretchen'
+        },
+        {
+            type: 'wolf',
+            color: 'grey',
+            mass: 45,
+            name: 'Iris'
+        },
+        elephant,
+        animal,
+        whale
+    ]
 
     // Welcome to the nested callback "Pyramid of Doom"
-    Animal.remove({}, ()=>{
-        //if(err){console.error('Animal Remove Error', err)}
-        elephant.save((err)=>{
-            if(err){console.error('Elephant save failed.', err)}
-            animal.save((err)=>{
-                if(err){console.error('Animal save failed.', err)}
-                whale.save((err)=>{
-                    if(err){console.error('Whale save failed.', err)}
-                    Animal.find({size: 'big'}, (err, animals) =>{
-                        animals.forEach((animal)=>{
-                            console.log(`${animal.name} the ${animal.color} ${animal.type}`)
-                        })
-                        db.close(()=>{
-                        console.log('MongoDB connection closed.')
-                        })
-                    })
+    Animal.remove({}, (err)=>{
+        if(err){console.error('Animal Remove Error', err)}
+        Animal.create(animalData, (err, animals)=>{
+            if(err){console.error('Whale save failed.', err)}
+            Animal.find({}, (err, animals) =>{
+                animals.forEach((animal)=>{
+                    console.log(`${animal.name} is a ${animal.size} ${animal.color} ${animal.type}`)
+                })
+                db.close(()=>{
+                console.log('MongoDB connection closed.')
                 })
             })
         })
